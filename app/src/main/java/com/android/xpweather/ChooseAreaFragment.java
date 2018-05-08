@@ -2,6 +2,7 @@ package com.android.xpweather;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import com.android.xpweather.db.City;
 import com.android.xpweather.db.Province;
 import com.android.xpweather.db.Country;
+import com.android.xpweather.gson.Weather;
 import com.android.xpweather.util.HttpUntil;
 import com.android.xpweather.util.Untility;
 
@@ -75,6 +77,12 @@ public class ChooseAreaFragment extends Fragment {
                 }else if (currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCoutries();
+                }else if(currentLevel == LEVEL_COUNTRY){
+                    String weatherId = countryList.get(position).getWeatherId();
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra("weather_id",weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });

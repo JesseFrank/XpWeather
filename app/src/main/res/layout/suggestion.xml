@@ -24,5 +24,11 @@
         android:id="@+id/sport_text"
         android:layout_margin="15dp"
         android:textColor="#fff"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/car_wash_text"
+        android:layout_margin="15dp"
+        android:textColor="#fff"/>
 
 </LinearLayout>
