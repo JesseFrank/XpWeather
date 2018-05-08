@@ -33,6 +33,8 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 
+
+
 public class ChooseAreaFragment extends Fragment {
     public static final int LEVEL_PROVINCE=0;
     public static final int LEVEL_CITY=1;
