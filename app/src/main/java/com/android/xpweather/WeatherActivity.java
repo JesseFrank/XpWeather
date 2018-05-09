@@ -3,6 +3,8 @@ package com.android.xpweather;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -23,7 +25,12 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
+import static com.android.xpweather.R.*;
+
 public class WeatherActivity extends AppCompatActivity {
+    public DrawerLayout drawerLayout;
+
+    public SwipeRefreshLayout swipeRefresh;
     private ScrollView weatherLayout;
     private TextView titleUpdateTime;
     private TextView titleCity;
@@ -39,6 +46,7 @@ public class WeatherActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        drawerLayout =(DrawerLayout) findViewById(id.drawer_layout);
         //必应每日一图
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(
@@ -47,33 +55,44 @@ public class WeatherActivity extends AppCompatActivity {
         );
         getWindow().setStatusBarColor(Color.TRANSPARENT);
 
-        setContentView(R.layout.activity_weather);
+        setContentView(layout.activity_weather);
         //初始化各控件
-        weatherLayout = (ScrollView) findViewById(R.id.weather_layout);
-        titleCity = (TextView) findViewById(R.id.title_city);
-        titleUpdateTime = (TextView) findViewById(R.id.title_update_time);
-        degreeText = (TextView) findViewById(R.id.title_update_time);
-        weatherInfoText = (TextView) findViewById(R.id.weather_info_text);
-        forecastLayout = (LinearLayout) findViewById(R.id.forecast_layout);
-        aqiText = (TextView) findViewById(R.id.aqi_text);
-        pm25Text = (TextView) findViewById(R.id.pm25_text);
-        comfortText = (TextView) findViewById(R.id.comfort_text);
-        carWashText = (TextView) findViewById(R.id.car_wash_text);
-        sportText = (TextView) findViewById(R.id.sport_text);
+        weatherLayout = (ScrollView) findViewById(id.weather_layout);
+        titleCity = (TextView) findViewById(id.title_city);
+        titleUpdateTime = (TextView) findViewById(id.title_update_time);
+        degreeText = (TextView) findViewById(id.title_update_time);
+        weatherInfoText = (TextView) findViewById(id.weather_info_text);
+        forecastLayout = (LinearLayout) findViewById(id.forecast_layout);
+        aqiText = (TextView) findViewById(id.aqi_text);
+        pm25Text = (TextView) findViewById(id.pm25_text);
+        comfortText = (TextView) findViewById(id.comfort_text);
+        carWashText = (TextView) findViewById(id.car_wash_text);
+        sportText = (TextView) findViewById(id.sport_text);
+        swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+        swipeRefresh.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather",null);
+        final String weatherId;
         if (weatherString != null){
             //有缓存时直接解析天气数据
             Weather weather = Utility.hanleWeatherResponse(weatherString);
+            weatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
         }else{
             //无缓存时在服务器查询天气
-            String weatherId = getIntent().getStringExtra("weather_id");
+            //String weatherId = getIntent().getStringExtra("weather_id");
+            weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
         }
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(weatherId);
+            }
+        });
     }
-    //根据天气od请求城市天气信息
+    //根据天气id请求城市天气信息
     public  void requestWeather(final String weatherId){
         String weatherUrl = "http://guolin.tech/api/weather?cityid="+ weatherId+ "&key=9550d109e7194d3192e9475d88879190";
         HttpUntil.sendOkHttpRequest(weatherUrl, new Callback() {
@@ -93,6 +112,7 @@ public class WeatherActivity extends AppCompatActivity {
                         }else {
                             Toast.makeText(WeatherActivity.this,"获取天气信息时报",Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefresh.setRefreshing(false);
                     }
                 });
             }
@@ -104,6 +124,7 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
+                 swipeRefresh.setRefreshing(false);
             }
 
 
@@ -125,11 +146,11 @@ private void showWeatherInfo(Weather weather){
     weatherInfoText.setText(weatherInfo);
     forecastLayout.removeAllViews();
     for(Forecast forecast : weather.forecastList){
-        View view = LayoutInflater.from(this).inflate(R.layout.forecast_item,forecastLayout,false);
-    TextView dateText =(TextView) view.findViewById(R.id.date_text);
-    TextView infoText =(TextView) view.findViewById(R.id.info_text);
-    TextView maxText =(TextView) view.findViewById(R.id.max_text);
-    TextView minText =(TextView) view.findViewById(R.id.min_text);
+        View view = LayoutInflater.from(this).inflate(layout.forecast_item,forecastLayout,false);
+    TextView dateText =(TextView) view.findViewById(id.date_text);
+    TextView infoText =(TextView) view.findViewById(id.info_text);
+    TextView maxText =(TextView) view.findViewById(id.max_text);
+    TextView minText =(TextView) view.findViewById(id.min_text);
     dateText.setText(forecast.date);
     infoText.setText(forecast.more.info);
     maxText.setText(forecast.temperature.max);
