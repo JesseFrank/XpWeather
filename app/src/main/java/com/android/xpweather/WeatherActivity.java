@@ -1,5 +1,6 @@
 package com.android.xpweather;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
@@ -109,6 +110,7 @@ public class WeatherActivity extends AppCompatActivity {
                             editor.putString("weather",responseText);
                             editor.apply();
                             showWeatherInfo(weather);
+
                         }else {
                             Toast.makeText(WeatherActivity.this,"获取天气信息时报",Toast.LENGTH_SHORT).show();
                         }
@@ -145,6 +147,8 @@ private void showWeatherInfo(Weather weather){
     degreeText.setText(degree);
     weatherInfoText.setText(weatherInfo);
     forecastLayout.removeAllViews();
+    Intent intent = new Intent(this,AutoUpdateService.class);
+    startService(intent);
     for(Forecast forecast : weather.forecastList){
         View view = LayoutInflater.from(this).inflate(layout.forecast_item,forecastLayout,false);
     TextView dateText =(TextView) view.findViewById(id.date_text);
